@@ -5,12 +5,13 @@ import (
 	log "github.com/cloudfoundry-community/firehose-to-syslog/logging"
 	"github.com/cloudfoundry/noaa/consumer"
 	"github.com/cloudfoundry/sonde-go/events"
+	"net/http"
 	"time"
 )
 
 func CreateFirehoseChan(DopplerEndpoint string, Token string, subId string, skipSSLValidation bool, keepAlive time.Duration) <-chan *events.Envelope {
 	consumer.KeepAlive = keepAlive
-	connection := consumer.New(DopplerEndpoint, &tls.Config{InsecureSkipVerify: skipSSLValidation}, nil)
+	connection := consumer.New(DopplerEndpoint, &tls.Config{InsecureSkipVerify: skipSSLValidation}, http.ProxyFromEnvironment)
 	connection.SetDebugPrinter(ConsoleDebugPrinter{})
 	msgChan, errorChan := connection.Firehose(subId, Token)
 	go func() {
