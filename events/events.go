@@ -23,6 +23,7 @@ var selectedEvents map[string]bool
 var selectedEventsCount map[string]uint64 = make(map[string]uint64)
 var mutex sync.Mutex
 var logMessageLimit int
+var silentTime time.Duration
 
 func RouteEvents(in <-chan *events.Envelope, extraFields map[string]string) {
 	for msg := range in {
@@ -381,10 +382,26 @@ func LogEventTotals(logTotalsTime time.Duration, dopplerEndpoint string) {
 			log.LogStd(output, true)
 		}
 	}()
+
+	silentTicker := time.NewTicker(silentTime)
+	silentLast := uint64(0)
+	go func() {
+		for range silentTicker.C {
+			total := GetTotalCountOfSelectedEvents()
+			if total-silentLast == 0 {
+				panic("Did not get any events in the last " + silentTime.String())
+			}
+			silentLast = total
+		}
+	}()
 }
 
 func SetLogMessageLimit(limit int) {
 	logMessageLimit = limit
+}
+
+func SetSilentTime(t time.Duration) {
+	silentTime = t
 }
 
 func getEventTotals(totalElapsedTime float64, elapsedTime float64, lastCount uint64, dopplerEndpoint string) (string, uint64) {

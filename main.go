@@ -38,6 +38,7 @@ var (
 	pathProf           = kingpin.Flag("path-prof", "Set the Path to write profiling file").Default("").OverrideDefaultFromEnvar("PATH_PROF").String()
 	logFormatterType   = kingpin.Flag("log-formatter-type", "Log formatter type to use. Valid options are text, json. If none provided, defaults to json.").Envar("LOG_FORMATTER_TYPE").String()
 	logMessageLimit    = kingpin.Flag("log-message-limit", "Split log messages longer than a given limit").Default("0").OverrideDefaultFromEnvar("LOG_MESSAGE_LIMIT").Int()
+	silentTime         = kingpin.Flag("silent-time", "Time without a log message before crashing. This is to address the stale firehose connection issue, default 5 minutes").Default("5m").OverrideDefaultFromEnvar("SILENT_TIME").Duration()
 )
 
 var (
@@ -126,6 +127,7 @@ func main() {
 
 	// set max message length per message
 	events.SetLogMessageLimit(*logMessageLimit)
+	events.SetSilentTime(*silentTime)
 
 	if logging.Connect() || *debug {
 
