@@ -122,12 +122,12 @@ func main() {
 	}
 
 	if *logEventTotals == true {
+		events.SetSilentTime(*silentTime)
 		events.LogEventTotals(*logEventTotalsTime, *dopplerEndpoint)
 	}
 
 	// set max message length per message
-	events.SetLogMessageLimit(*logMessageLimit)
-	events.SetSilentTime(*silentTime)
+	events.SetLogMessageLimit(*logMessageLimit)	
 
 	if logging.Connect() || *debug {
 
